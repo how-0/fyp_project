@@ -13,38 +13,43 @@ class AuthController extends Controller
 {
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user();
+
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        return response()->json($user);
     }
 
     public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
-        if (Auth::guard('user')->attempt($request->only('email', 'password'))) {
-            $user = Auth::guard('user')->user();
-
-            // Invalidate the previous session so only one device can be logged in at a time
-            if ($user->session_id) {
-                DB::table('sessions')->where('id', $user->session_id)->delete();
-            }
-
-            $request->session()->regenerate();
-
-            $user->session_id = $request->session()->getId();
-            $user->save();
-
+        if (! Auth::guard('web')->attempt($request->only('email', 'password'))) {
             return response()->json([
-                'message' => 'Logged in successfully',
-                'user' => $user,
-            ]);
+                'message' => 'Wrong password.',
+            ], 401);
         }
 
+        $user = Auth::guard('web')->user();
+
+        if ($user->session_id) {
+            DB::table('sessions')->where('id', $user->session_id)->delete();
+        }
+
+        $request->session()->regenerate();
+
+        $user->session_id = $request->session()->getId();
+        $user->save();
+
         return response()->json([
-            'message' => 'Wrong password.',
-        ], 401);
+            'message' => 'Logged in successfully',
+            'user' => $user,
+        ]);
     }
 
     public function register(Request $request)
@@ -55,15 +60,39 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $user  = User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password)
+            'password' => Hash::make($request->password),
         ]);
+
+        Auth::guard('web')->login($user);
+        $request->session()->regenerate();
+
+        $user->session_id = $request->session()->getId();
+        $user->save();
 
         return response()->json([
             'message' => 'Account created successfully.',
             'user' => $user,
         ], 201);
+    }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user) {
+            $user->session_id = null;
+            $user->save();
+        }
+
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->json([
+            'message' => 'Logged out successfully.',
+        ]);
     }
 }

@@ -69,7 +69,7 @@ const handleLogin = async () => {
 
   try {
     await login(form)
-    await navigateTo('/')
+    await navigateTo('/itineraries')
   } catch (err) {
     error.value =
       err?.response?.data?.message ||

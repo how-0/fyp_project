@@ -65,40 +65,41 @@
 </template>
 
 <script setup>
-const loading = ref(false);
-const error = ref("");
+const client = useSanctumClient()
+const { refreshIdentity } = useSanctumAuth()
+
+const loading = ref(false)
+const error = ref('')
 
 const form = reactive({
-  name: "",
-  email: "",
-  password: "",
-  password_confirmation: "",
-});
-
-const config = useRuntimeConfig();
-const router = useRouter();
+  name: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
+})
 
 const register = async () => {
-  error.value = "";
+  error.value = ''
 
   if (form.password !== form.password_confirmation) {
-    error.value = "Passwords do not match.";
-    return;
+    error.value = 'Passwords do not match.'
+    return
   }
 
-  loading.value = true;
+  loading.value = true
 
   try {
-    await $fetch(`${config.public.apiBase}/register`, {
-      method: "POST",
+    await client('/api/register', {
+      method: 'POST',
       body: form,
-    });
+    })
 
-    router.push("/login");
+    await refreshIdentity()
+    await navigateTo('/itineraries')
   } catch (err) {
-    error.value = err?.data?.message ?? "Registration failed.";
+    error.value = err?.data?.message ?? 'Registration failed.'
+  } finally {
+    loading.value = false
   }
-
-  loading.value = false;
-};
+}
 </script>

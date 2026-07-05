@@ -19,9 +19,38 @@ export default defineNuxtConfig({
     plugins: [
       tailwindcss(),
     ],
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8000',
+          changeOrigin: true,
+        },
+        '/sanctum': {
+          target: 'http://localhost:8000',
+          changeOrigin: true,
+        },
+      },
+    },
   },
   modules: ['nuxt-auth-sanctum', 'arco-design-nuxt-module'],
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api',
+      googleMapsKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_KEY || '',
+    },
+  },
   sanctum: {
-    baseUrl: 'http://localhost:8000', // Laravel API
+    baseUrl: process.env.NUXT_PUBLIC_SANCTUM_BASE_URL || 'http://localhost:3000',
+    endpoints: {
+      login: '/api/login',
+      logout: '/api/logout',
+      user: '/api/user',
+      csrf: '/sanctum/csrf-cookie',
+    },
+    redirect: {
+      keepRequestedRoute: true,
+      onLogin: '/itineraries',
+      onLogout: '/login',
+    },
   },
 })

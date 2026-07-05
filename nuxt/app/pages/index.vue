@@ -1,14 +1,9 @@
 <script setup>
-await navigateTo('/login');
-// Composables
+const { isAuthenticated } = useSanctumAuth()
 
-// Fetch
-
-// Data
-
-// Computed
-
-// Methods
-
-// Mounted
+if (isAuthenticated.value) {
+  await navigateTo('/itineraries')
+} else {
+  await navigateTo('/login')
+}
 </script>
