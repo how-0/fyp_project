@@ -19,6 +19,18 @@ export default defineNuxtConfig({
     plugins: [
       tailwindcss(),
     ],
+    optimizeDeps: {
+      include: [
+        'dayjs',
+        'dayjs/locale/zh-cn',
+        'dayjs/plugin/advancedFormat',
+        'dayjs/plugin/customParseFormat',
+        'dayjs/plugin/isBetween',
+        'dayjs/plugin/quarterOfYear',
+        'dayjs/plugin/weekOfYear',
+        'dayjs/plugin/weekYear',
+      ],
+    },
     server: {
       proxy: {
         '/api': {
