@@ -21,6 +21,8 @@ class ItineraryGeneratorService
 
     public function generate(User $user, array $params): Itinerary
     {
+        set_time_limit((int) config('itinerary.generation_time_limit', 120));
+
         $aiData = $this->callGemini($params);
 
         return DB::transaction(function () use ($user, $params, $aiData) {
@@ -83,6 +85,8 @@ class ItineraryGeneratorService
 
     public function regenerateDay(Itinerary $itinerary, int $dayNumber, ?string $notes = null): ItineraryDay
     {
+        set_time_limit((int) config('itinerary.generation_time_limit', 120));
+
         $day = $itinerary->days()->where('day_number', $dayNumber)->firstOrFail();
         $aiData = $this->callGemini([
             'location' => $itinerary->location,
@@ -140,11 +144,7 @@ class ItineraryGeneratorService
     {
         $prompt = $this->buildPrompt($params, $singleDay, $notes, $existing);
 
-        try {
-            return $this->generateJson($prompt);
-        } catch (\Throwable $e) {
-            return $this->generateJson($prompt);
-        }
+        return $this->generateJson($prompt);
     }
 
     private function generateJson(string $prompt): array
@@ -171,6 +171,8 @@ class ItineraryGeneratorService
     {
         $preferences = implode(', ', $params['activity_preferences'] ?? []);
         $budgetText = $this->formatBudget($params);
+        $travelStyle = $params['travel_style'] ?? 'mid-range';
+        $pace = $params['pace'] ?? 'moderate';
         $featured = Destination::where('is_featured', true)->limit(5)->pluck('name')->implode(', ');
         $dayInstruction = $singleDay
             ? "Generate ONLY day {$singleDay} of the itinerary."
@@ -190,8 +192,8 @@ Requirements:
 - Location: {$params['location']}, Malaysia
 - {$dayInstruction}
 - Interests: {$preferences}
-- Travel style: {$params['travel_style'] ?? 'mid-range'}
-- Pace: {$params['pace'] ?? 'moderate'}
+- Travel style: {$travelStyle}
+- Pace: {$pace}
 - Budget: {$budgetText} (currency: MYR)
 - Use realistic Malaysian locations, local food spots, and practical timing
 - Featured destinations to consider: {$featured}

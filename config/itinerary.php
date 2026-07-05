@@ -44,5 +44,7 @@ return [
 
     'places_cache_days' => 7,
 
+    'generation_time_limit' => env('ITINERARY_GENERATION_TIME_LIMIT', 120),
+
     'gemini_model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
 ];

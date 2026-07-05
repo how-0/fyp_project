@@ -56,7 +56,7 @@ class GooglePlacesService
         }
 
         try {
-            $findResponse = Http::get('https://maps.googleapis.com/maps/api/place/findplacefromtext/json', [
+            $findResponse = Http::timeout(10)->get('https://maps.googleapis.com/maps/api/place/findplacefromtext/json', [
                 'input' => "{$query}, {$location}, Malaysia",
                 'inputtype' => 'textquery',
                 'fields' => 'place_id,name,geometry,formatted_address',
@@ -69,7 +69,7 @@ class GooglePlacesService
                 return null;
             }
 
-            $detailsResponse = Http::get('https://maps.googleapis.com/maps/api/place/details/json', [
+            $detailsResponse = Http::timeout(10)->get('https://maps.googleapis.com/maps/api/place/details/json', [
                 'place_id' => $candidate['place_id'],
                 'fields' => 'place_id,name,geometry,formatted_address,price_level,types',
                 'key' => $apiKey,
