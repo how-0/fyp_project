@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto">
+  <div>
     <h1 class="text-2xl font-bold mb-2">Plan a New Trip</h1>
     <p class="text-gray-500 mb-6">Tell us your preferences and AI will build a Malaysia itinerary for you.</p>
 

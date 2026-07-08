@@ -1,67 +1,79 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <a-card class="w-full max-w-md shadow-lg">
-      <h1 class="text-2xl font-bold text-center mb-6">
-        Login
-      </h1>
+  <a-card class="shadow-lg border-0">
+    <h1 class="text-2xl font-bold text-center mb-2">
+      Welcome back
+    </h1>
+    <p class="text-gray-500 text-center mb-6 text-sm">
+      Sign in to manage your itineraries
+    </p>
 
-      <a-form @submit="handleLogin" layout="vertical">
-
-        <!-- Email -->
-        <a-form-item label="Email">
-          <a-input
-            v-model="form.email"
-            placeholder="Enter your email"
-          >
-            <template #prefix>
-              <icon-user />
-            </template>
-          </a-input>
-        </a-form-item>
-
-        <!-- Password -->
-        <a-form-item label="Password">
-          <a-input-password
-            v-model="form.password"
-            placeholder="Enter your password"
-          />
-        </a-form-item>
-
-        <!-- Error -->
-        <a-alert
-          v-if="error"
-          type="error"
-          :content="error"
-          class="mb-4"
-        />
-
-        <!-- Button -->
-        <a-button
-          html-type="submit"
-          type="primary"
-          long
-          :loading="loading"
+    <a-form @submit="handleLogin" layout="vertical">
+      <a-form-item label="Email">
+        <a-input
+          v-model="form.email"
+          placeholder="Enter your email"
         >
-          {{ loading ? 'Logging in...' : 'Login' }}
-        </a-button>
+          <template #prefix>
+            <icon-user />
+          </template>
+        </a-input>
+      </a-form-item>
 
-      </a-form>
-    </a-card>
-  </div>
+      <a-form-item label="Password">
+        <a-input-password
+          v-model="form.password"
+          placeholder="Enter your password"
+        />
+      </a-form-item>
+
+      <a-alert
+        v-if="error"
+        type="error"
+        :content="error"
+        class="mb-4"
+      />
+
+      <a-button
+        html-type="submit"
+        type="primary"
+        long
+        :loading="loading"
+      >
+        {{ loading ? 'Logging in...' : 'Login' }}
+      </a-button>
+    </a-form>
+
+    <div class="text-center mt-6 text-sm text-gray-500">
+      Don't have an account?
+      <NuxtLink to="/register" class="text-blue-600 hover:text-blue-700 font-medium">
+        Create one
+      </NuxtLink>
+    </div>
+  </a-card>
 </template>
 
 <script setup>
 import { IconUser } from '@arco-design/web-vue/es/icon'
 
+definePageMeta({
+  middleware: 'sanctum:guest',
+  layout: 'auth',
+})
+
 const { login } = useSanctumAuth()
+const { redirectToItineraryIfLoggedIn } = useAuthRedirect()
 
 const form = reactive({
   email: '',
-  password: ''
+  password: '',
 })
 
 const loading = ref(false)
 const error = ref('')
+
+onMounted(async () => {
+  await redirectToItineraryIfLoggedIn()
+})
 
 const handleLogin = async () => {
   loading.value = true

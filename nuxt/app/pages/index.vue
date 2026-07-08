@@ -1,7 +1,7 @@
 <script setup>
-const { isAuthenticated } = useSanctumAuth()
+const { isLoggedIn } = useAuthRedirect()
 
-if (isAuthenticated.value) {
+if (isLoggedIn()) {
   await navigateTo('/itineraries')
 } else {
   await navigateTo('/login')

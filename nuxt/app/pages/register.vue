@@ -1,72 +1,62 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="w-full max-w-md bg-white rounded-lg shadow p-8">
-      <h1 class="text-2xl font-bold text-center mb-6">Create Account</h1>
+  <a-card class="shadow-lg border-0">
+    <h1 class="text-2xl font-bold text-center mb-2">Create Account</h1>
+    <p class="text-gray-500 text-center mb-6 text-sm">
+      Start planning your Malaysia adventures
+    </p>
 
-      <form @submit.prevent="register" class="space-y-4">
-        <div>
-          <label class="block mb-1">Name</label>
-          <input
-            v-model="form.name"
-            type="text"
-            class="w-full border rounded-lg p-3"
-            required
-          />
-        </div>
+    <a-form @submit="register" layout="vertical">
+      <a-form-item label="Name">
+        <a-input v-model="form.name" placeholder="Your name" />
+      </a-form-item>
 
-        <div>
-          <label class="block mb-1">Email</label>
-          <input
-            v-model="form.email"
-            type="email"
-            class="w-full border rounded-lg p-3"
-            required
-          />
-        </div>
+      <a-form-item label="Email">
+        <a-input v-model="form.email" placeholder="your@email.com" />
+      </a-form-item>
 
-        <div>
-          <label class="block mb-1">Password</label>
-          <input
-            v-model="form.password"
-            type="password"
-            class="w-full border rounded-lg p-3"
-            required
-          />
-        </div>
+      <a-form-item label="Password">
+        <a-input-password v-model="form.password" placeholder="Create a password" />
+      </a-form-item>
 
-        <div>
-          <label class="block mb-1">Confirm Password</label>
-          <input
-            v-model="form.password_confirmation"
-            type="password"
-            class="w-full border rounded-lg p-3"
-            required
-          />
-        </div>
+      <a-form-item label="Confirm Password">
+        <a-input-password v-model="form.password_confirmation" placeholder="Confirm your password" />
+      </a-form-item>
 
-        <button
-          class="w-full bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700 disabled:opacity-50"
-          :disabled="loading"
-        >
-          {{ loading ? "Creating account..." : "Register" }}
-        </button>
+      <a-alert
+        v-if="error"
+        type="error"
+        :content="error"
+        class="mb-4"
+      />
 
-        <p v-if="error" class="text-red-500 text-sm">
-          {{ error }}
-        </p>
-      </form>
+      <a-button
+        html-type="submit"
+        type="primary"
+        long
+        :loading="loading"
+      >
+        {{ loading ? 'Creating account...' : 'Register' }}
+      </a-button>
+    </a-form>
 
-      <div class="text-center mt-6">
-        Already have an account?
-        <NuxtLink to="/login" class="text-blue-600"> Login </NuxtLink>
-      </div>
+    <div class="text-center mt-6 text-sm text-gray-500">
+      Already have an account?
+      <NuxtLink to="/login" class="text-blue-600 hover:text-blue-700 font-medium">
+        Login
+      </NuxtLink>
     </div>
-  </div>
+  </a-card>
 </template>
 
 <script setup>
+definePageMeta({
+  middleware: 'sanctum:guest',
+  layout: 'auth',
+})
+
 const client = useSanctumClient()
 const { refreshIdentity } = useSanctumAuth()
+const { redirectToItineraryIfLoggedIn } = useAuthRedirect()
 
 const loading = ref(false)
 const error = ref('')
@@ -76,6 +66,10 @@ const form = reactive({
   email: '',
   password: '',
   password_confirmation: '',
+})
+
+onMounted(async () => {
+  await redirectToItineraryIfLoggedIn()
 })
 
 const register = async () => {

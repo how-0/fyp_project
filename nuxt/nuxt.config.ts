@@ -63,6 +63,7 @@ export default defineNuxtConfig({
       keepRequestedRoute: true,
       onLogin: '/itineraries',
       onLogout: '/login',
+      onGuestOnly: '/itineraries',
     },
   },
 })
