@@ -22,6 +22,9 @@ class ItineraryActivity extends Model
         'category',
         'estimated_cost',
         'cost_source',
+        'attraction_price_id',
+        'price_source_name',
+        'price_source_url',
         'price_level',
         'is_ai_suggested',
         'user_modified',
@@ -42,5 +45,10 @@ class ItineraryActivity extends Model
     public function day(): BelongsTo
     {
         return $this->belongsTo(ItineraryDay::class, 'itinerary_day_id');
+    }
+
+    public function attractionPrice(): BelongsTo
+    {
+        return $this->belongsTo(AttractionPrice::class);
     }
 }

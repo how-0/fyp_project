@@ -13,6 +13,8 @@ export interface ItineraryActivity {
   category: string
   estimated_cost: number
   cost_source: string
+  price_source_name?: string
+  price_source_url?: string
   price_level?: number
   is_ai_suggested: boolean
   user_modified: boolean

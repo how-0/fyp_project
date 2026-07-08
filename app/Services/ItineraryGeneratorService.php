@@ -16,6 +16,7 @@ class ItineraryGeneratorService
 {
     public function __construct(
         private GooglePlacesService $placesService,
+        private AttractionPriceService $priceService,
         private CostEnrichmentService $costService,
     ) {}
 
@@ -77,6 +78,7 @@ class ItineraryGeneratorService
 
             $itinerary->load('days.activities');
             $this->placesService->enrichItinerary($itinerary);
+            $this->priceService->applyToItinerary($itinerary);
             $this->costService->recalculateItinerary($itinerary);
 
             return $itinerary->fresh(['days.activities']);
@@ -183,6 +185,7 @@ class ItineraryGeneratorService
 
         $day->load('activities');
         $this->placesService->enrichDay($day, $itinerary->location);
+        $this->priceService->applyToDay($day, $itinerary->location);
         $this->costService->recalculateItinerary($itinerary->fresh(['days.activities']));
 
         $this->markGeneratedIfComplete($itinerary);
@@ -244,8 +247,10 @@ class ItineraryGeneratorService
         });
 
         $day->load('activities');
-        $this->placesService->enrichItinerary($itinerary->fresh(['days.activities']));
-        $this->costService->recalculateItinerary($itinerary->fresh(['days.activities']));
+        $itinerary = $itinerary->fresh(['days.activities']);
+        $this->placesService->enrichItinerary($itinerary);
+        $this->priceService->applyToItinerary($itinerary);
+        $this->costService->recalculateItinerary($itinerary);
 
         return $day->fresh('activities');
     }
@@ -402,7 +407,7 @@ PROMPT;
             'budget_max' => $itinerary->budget_max,
         ]);
         $avoid = $existingNames
-            ? 'Do NOT repeat these places already used on other days: ' . implode(', ', array_slice($existingNames, 0, 40))
+            ? 'Do NOT repeat these places already used on other days: '.implode(', ', array_slice($existingNames, 0, 40))
             : '';
 
         return <<<PROMPT
@@ -495,7 +500,7 @@ PROMPT;
         }
 
         if (preg_match('/^\d{2}:\d{2}$/', $time)) {
-            return $time . ':00';
+            return $time.':00';
         }
 
         return $time;

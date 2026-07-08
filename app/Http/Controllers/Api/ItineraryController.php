@@ -98,7 +98,7 @@ class ItineraryController extends Controller
         $itinerary->load('days.activities');
 
         $copy = $itinerary->replicate(['ai_prompt_hash']);
-        $copy->title = $itinerary->title . ' (Copy)';
+        $copy->title = $itinerary->title.' (Copy)';
         $copy->status = 'draft';
         $copy->save();
 
@@ -276,9 +276,9 @@ class ItineraryController extends Controller
             'title' => $itinerary->title,
             'location' => $itinerary->location,
             'duration_days' => $itinerary->duration_days,
-            'total_estimated_cost' => $itinerary->total_estimated_cost,
-            'budget_min' => $itinerary->budget_min,
-            'budget_max' => $itinerary->budget_max,
+            'total_estimated_cost' => (float) $itinerary->total_estimated_cost,
+            'budget_min' => $itinerary->budget_min !== null ? (float) $itinerary->budget_min : null,
+            'budget_max' => $itinerary->budget_max !== null ? (float) $itinerary->budget_max : null,
             'budget_fit_percent' => $this->costService->budgetFitPercent($itinerary),
             'status' => $itinerary->status,
             'created_at' => $itinerary->created_at,
@@ -320,6 +320,8 @@ class ItineraryController extends Controller
                     'category' => $a->category,
                     'estimated_cost' => $a->estimated_cost,
                     'cost_source' => $a->cost_source,
+                    'price_source_name' => $a->price_source_name,
+                    'price_source_url' => $a->price_source_url,
                     'price_level' => $a->price_level,
                     'is_ai_suggested' => $a->is_ai_suggested,
                     'user_modified' => $a->user_modified,

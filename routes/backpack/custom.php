@@ -19,6 +19,7 @@ Route::group([
     Route::redirect('/', '/admin/destination', 302)->name('backpack');
 
     Route::crud('destination', 'DestinationCrudController');
+    Route::crud('attraction-price', 'AttractionPriceCrudController');
     Route::crud('itinerary', 'ItineraryCrudController');
 });
 

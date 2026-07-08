@@ -14,8 +14,14 @@ class CostEnrichmentService
         foreach ($itinerary->days as $day) {
             foreach ($day->activities as $activity) {
                 if ($activity->cost_source !== 'manual') {
-                    $cost = $this->resolveActivityCost($activity);
-                    $activity->update(['estimated_cost' => $cost]);
+                    $resolved = $this->resolveActivityCost($activity);
+                    $updates = ['estimated_cost' => $resolved['cost']];
+
+                    if ($resolved['cost_source'] !== null) {
+                        $updates['cost_source'] = $resolved['cost_source'];
+                    }
+
+                    $activity->update($updates);
                 }
 
                 $total += (float) $activity->fresh()->estimated_cost;
@@ -25,21 +31,34 @@ class CostEnrichmentService
         $itinerary->update(['total_estimated_cost' => $total]);
     }
 
-    public function resolveActivityCost(ItineraryActivity $activity): float
+    /**
+     * @return array{cost: float, cost_source: string|null}
+     */
+    public function resolveActivityCost(ItineraryActivity $activity): array
     {
         if ($activity->cost_source === 'manual') {
-            return (float) $activity->estimated_cost;
+            return ['cost' => (float) $activity->estimated_cost, 'cost_source' => null];
+        }
+
+        if ($activity->cost_source === 'catalog') {
+            return ['cost' => (float) $activity->estimated_cost, 'cost_source' => null];
         }
 
         if ($activity->price_level !== null) {
             $range = config("itinerary.price_level_ranges.{$activity->price_level}");
 
             if ($range) {
-                return ($range['min'] + $range['max']) / 2;
+                return [
+                    'cost' => ($range['min'] + $range['max']) / 2,
+                    'cost_source' => 'places',
+                ];
             }
         }
 
-        return (float) $activity->estimated_cost;
+        return [
+            'cost' => (float) $activity->estimated_cost,
+            'cost_source' => 'ai',
+        ];
     }
 
     public function budgetFitPercent(Itinerary $itinerary): ?float

@@ -18,7 +18,24 @@
       </div>
 
       <div class="text-right shrink-0">
-        <div class="font-semibold text-green-600">RM{{ Number(activity.estimated_cost).toFixed(0) }}</div>
+        <div class="font-semibold text-green-600">RM{{ Number(activity.estimated_cost).toFixed(2) }}</div>
+        <p class="text-xs text-gray-400 mt-1 max-w-[120px]">
+          <a
+            v-if="activity.cost_source === 'catalog' && activity.price_source_url"
+            :href="activity.price_source_url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-blue-600 hover:underline"
+          >
+            From {{ activity.price_source_name || 'catalog' }}
+          </a>
+          <span v-else-if="activity.cost_source === 'catalog'">
+            From {{ activity.price_source_name || 'price catalog' }}
+          </span>
+          <span v-else-if="activity.cost_source === 'places'">Google price level estimate</span>
+          <span v-else-if="activity.cost_source === 'manual'">Custom price</span>
+          <span v-else>AI estimate</span>
+        </p>
         <div class="flex gap-1 mt-2">
           <a-button size="mini" @click="$emit('edit', activity)">Edit</a-button>
           <a-button size="mini" @click="$emit('suggest', activity)">Suggest</a-button>
