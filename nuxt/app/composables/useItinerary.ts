@@ -10,6 +10,15 @@ export const useItinerary = () => {
   const generate = (params: GenerateParams) =>
     client<Itinerary>('/api/itineraries/generate', { method: 'POST', body: params })
 
+  const generateOutline = (params: GenerateParams) =>
+    client<Itinerary>('/api/itineraries/generate-outline', { method: 'POST', body: params })
+
+  const generateDay = (id: number | string, dayNumber: number) =>
+    client<Itinerary>(`/api/itineraries/${id}/generate-day`, {
+      method: 'POST',
+      body: { day_number: dayNumber },
+    })
+
   const update = (id: number | string, data: Partial<Itinerary>) =>
     client<Itinerary>(`/api/itineraries/${id}`, { method: 'PATCH', body: data })
 
@@ -63,6 +72,8 @@ export const useItinerary = () => {
     list,
     get,
     generate,
+    generateOutline,
+    generateDay,
     update,
     remove,
     duplicate,

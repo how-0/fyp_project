@@ -59,7 +59,7 @@ const compareMode = computed(() => route.query.compare === '1')
 const selectedIds = ref([])
 
 const statusColor = (status) => {
-  const map = { draft: 'gray', generated: 'blue', finalized: 'green' }
+  const map = { draft: 'gray', generating: 'orange', generated: 'blue', finalized: 'green' }
   return map[status] || 'gray'
 }
 

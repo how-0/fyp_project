@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Itinerary;
+use App\Models\ItineraryDay;
 use App\Models\PlacesCache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -12,25 +13,30 @@ class GooglePlacesService
     public function enrichItinerary(Itinerary $itinerary): void
     {
         foreach ($itinerary->days as $day) {
-            foreach ($day->activities as $activity) {
-                if (! $activity->search_query) {
-                    continue;
-                }
+            $this->enrichDay($day, $itinerary->location);
+        }
+    }
 
-                $place = $this->lookupPlace($activity->search_query, $itinerary->location);
-
-                if (! $place) {
-                    continue;
-                }
-
-                $activity->update([
-                    'place_id' => $place['place_id'],
-                    'lat' => $place['lat'],
-                    'lng' => $place['lng'],
-                    'address' => $place['address'],
-                    'price_level' => $place['price_level'],
-                ]);
+    public function enrichDay(ItineraryDay $day, string $location): void
+    {
+        foreach ($day->activities as $activity) {
+            if (! $activity->search_query) {
+                continue;
             }
+
+            $place = $this->lookupPlace($activity->search_query, $location);
+
+            if (! $place) {
+                continue;
+            }
+
+            $activity->update([
+                'place_id' => $place['place_id'],
+                'lat' => $place['lat'],
+                'lng' => $place['lng'],
+                'address' => $place['address'],
+                'price_level' => $place['price_level'],
+            ]);
         }
     }
 

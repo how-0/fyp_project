@@ -35,6 +35,34 @@ class ItineraryController extends Controller
         return response()->json($this->fullPayload($itinerary), 201);
     }
 
+    /**
+     * Progressive generation, step 1: create the itinerary shell (title,
+     * summary, day themes) with a fast Gemini call. Days have no activities
+     * yet; the frontend fills them via generateDay below.
+     */
+    public function generateOutline(GenerateItineraryRequest $request): JsonResponse
+    {
+        $itinerary = $this->generator->generateOutline($request->user(), $request->validated());
+
+        return response()->json($this->fullPayload($itinerary), 201);
+    }
+
+    /**
+     * Progressive generation, step 2: generate activities for a single day.
+     */
+    public function generateDay(Request $request, Itinerary $itinerary): JsonResponse
+    {
+        $this->authorizeItinerary($request, $itinerary);
+
+        $data = $request->validate([
+            'day_number' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $this->generator->generateDayActivities($itinerary, $data['day_number']);
+
+        return response()->json($this->fullPayload($itinerary->fresh('days.activities')));
+    }
+
     public function show(Request $request, Itinerary $itinerary): JsonResponse
     {
         $this->authorizeItinerary($request, $itinerary);

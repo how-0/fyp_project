@@ -20,6 +20,7 @@
         <a-select
           v-model="itinerary.status"
           :options="statusOptions"
+          :disabled="progressiveGenerating"
           style="width: 140px"
           @change="saveStatus"
         />
@@ -28,11 +29,44 @@
       </div>
     </div>
 
+    <div
+      v-if="progressiveGenerating"
+      class="mb-6 p-4 rounded-lg border border-blue-200 bg-blue-50"
+    >
+      <div class="flex items-center gap-3 mb-2">
+        <a-spin :size="18" />
+        <span class="font-medium text-blue-800">
+          Building your itinerary... Day {{ currentGeneratingDay }} of {{ itinerary.duration_days }}
+        </span>
+      </div>
+      <a-progress
+        :percent="generationProgress"
+        :show-text="false"
+        status="normal"
+      />
+      <p class="text-sm text-blue-700 mt-2">
+        Each day appears below as soon as it's ready — feel free to start reading.
+      </p>
+    </div>
+
+    <a-alert
+      v-if="generationError"
+      type="warning"
+      class="mb-6"
+      :content="generationError"
+    >
+      <template #action>
+        <a-button size="small" type="primary" @click="resumeGeneration">Retry</a-button>
+      </template>
+    </a-alert>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 space-y-4">
         <ItineraryTimeline
           :days="itinerary.days"
           :regenerating="regenerating"
+          :pending-days="pendingDayNumbers"
+          :generating-day="currentGeneratingDay"
           @reorder="handleReorder"
           @edit-activity="openEditModal"
           @suggest-activity="openSuggestDrawer"
@@ -121,6 +155,7 @@ const {
   updateActivity,
   suggestAlternative,
   regenerateDay,
+  generateDay,
 } = useItinerary()
 
 const loading = ref(true)
@@ -142,9 +177,55 @@ const suggestTarget = ref(null)
 
 const statusOptions = [
   { label: 'Draft', value: 'draft' },
+  { label: 'Generating...', value: 'generating', disabled: true },
   { label: 'Generated', value: 'generated' },
   { label: 'Finalized', value: 'finalized' },
 ]
+
+// Progressive generation: fill empty days one by one so the user sees
+// results batch by batch instead of a single long loading state.
+const progressiveGenerating = ref(false)
+const currentGeneratingDay = ref(0)
+const generationError = ref('')
+
+const pendingDayNumbers = computed(() => {
+  if (!progressiveGenerating.value || !itinerary.value?.days) return []
+  return itinerary.value.days
+    .filter((day) => !day.activities?.length)
+    .map((day) => day.day_number)
+})
+
+const generationProgress = computed(() => {
+  const days = itinerary.value?.days || []
+  if (!days.length) return 0
+  const done = days.filter((day) => day.activities?.length).length
+  return done / days.length
+})
+
+const fillPendingDays = async () => {
+  if (progressiveGenerating.value) return
+  progressiveGenerating.value = true
+  generationError.value = ''
+
+  try {
+    while (true) {
+      const nextDay = (itinerary.value?.days || []).find((day) => !day.activities?.length)
+      if (!nextDay) break
+
+      currentGeneratingDay.value = nextDay.day_number
+      itinerary.value = await generateDay(route.params.id, nextDay.day_number)
+    }
+  } catch (err) {
+    generationError.value =
+      err?.data?.message ||
+      `Day ${currentGeneratingDay.value} could not be generated. Click Retry to continue.`
+  } finally {
+    progressiveGenerating.value = false
+    currentGeneratingDay.value = 0
+  }
+}
+
+const resumeGeneration = () => fillPendingDays()
 
 const loadItinerary = async () => {
   itinerary.value = await get(route.params.id)
@@ -156,6 +237,11 @@ onMounted(async () => {
     await loadItinerary()
   } finally {
     loading.value = false
+  }
+
+  // Resumes automatically after a refresh mid-generation too.
+  if (itinerary.value?.status === 'generating') {
+    fillPendingDays()
   }
 })
 

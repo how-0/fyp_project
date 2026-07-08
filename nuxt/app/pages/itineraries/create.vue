@@ -24,7 +24,7 @@ definePageMeta({
   layout: 'default',
 })
 
-const { generate } = useItinerary()
+const { generateOutline } = useItinerary()
 
 const generating = ref(false)
 const error = ref('')
@@ -34,7 +34,9 @@ const handleGenerate = async (params) => {
   error.value = ''
 
   try {
-    const itinerary = await generate(params)
+    // Fast call: only the trip outline is generated here. The detail page
+    // detects 'generating' status and fills in the days one by one.
+    const itinerary = await generateOutline(params)
     await navigateTo(`/itineraries/${itinerary.id}`)
   } catch (err) {
     error.value = err?.data?.message || 'Failed to generate itinerary. Check your Gemini API key.'

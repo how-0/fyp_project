@@ -12,6 +12,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/itineraries', [\App\Http\Controllers\Api\ItineraryController::class, 'index']);
     Route::post('/itineraries/generate', [\App\Http\Controllers\Api\ItineraryController::class, 'generate']);
+    Route::post('/itineraries/generate-outline', [\App\Http\Controllers\Api\ItineraryController::class, 'generateOutline']);
+    Route::post('/itineraries/{itinerary}/generate-day', [\App\Http\Controllers\Api\ItineraryController::class, 'generateDay']);
     Route::post('/itineraries/compare', [\App\Http\Controllers\Api\ItineraryController::class, 'compare']);
     Route::get('/itineraries/{itinerary}', [\App\Http\Controllers\Api\ItineraryController::class, 'show']);
     Route::patch('/itineraries/{itinerary}', [\App\Http\Controllers\Api\ItineraryController::class, 'update']);
