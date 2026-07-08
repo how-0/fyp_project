@@ -48,12 +48,13 @@
 <script setup>
 const emit = defineEmits(['submit'])
 
-defineProps({
+const props = defineProps({
   loading: { type: Boolean, default: false },
+  initialLocation: { type: String, default: '' },
 })
 
 const form = reactive({
-  location: 'Penang, Malaysia',
+  location: props.initialLocation || 'Penang, Malaysia',
   duration_days: 3,
   activity_preferences: ['food', 'heritage'],
   budget_min: 500,
@@ -83,6 +84,15 @@ const paceOptions = [
   { label: 'Moderate', value: 'moderate' },
   { label: 'Packed', value: 'packed' },
 ]
+
+watch(
+  () => props.initialLocation,
+  (location) => {
+    if (location) {
+      form.location = location
+    }
+  },
+)
 
 const locationInput = ref(null)
 const config = useRuntimeConfig()

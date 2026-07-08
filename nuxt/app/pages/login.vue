@@ -45,7 +45,10 @@
 
     <div class="text-center mt-6 text-sm text-gray-500">
       Don't have an account?
-      <NuxtLink to="/register" class="text-blue-600 hover:text-blue-700 font-medium">
+      <NuxtLink
+        :to="{ path: '/register', query: route.query.redirect ? { redirect: route.query.redirect } : {} }"
+        class="text-blue-600 hover:text-blue-700 font-medium"
+      >
         Create one
       </NuxtLink>
     </div>
@@ -62,6 +65,7 @@ definePageMeta({
 
 const { login } = useSanctumAuth()
 const { redirectToItineraryIfLoggedIn } = useAuthRedirect()
+const route = useRoute()
 
 const form = reactive({
   email: '',
@@ -70,6 +74,15 @@ const form = reactive({
 
 const loading = ref(false)
 const error = ref('')
+
+const redirectAfterLogin = async () => {
+  const redirect = route.query.redirect
+  if (typeof redirect === 'string' && redirect.startsWith('/')) {
+    await navigateTo(redirect)
+    return
+  }
+  await navigateTo('/itineraries')
+}
 
 onMounted(async () => {
   await redirectToItineraryIfLoggedIn()
@@ -81,7 +94,7 @@ const handleLogin = async () => {
 
   try {
     await login(form)
-    await navigateTo('/itineraries')
+    await redirectAfterLogin()
   } catch (err) {
     error.value =
       err?.response?.data?.message ||

@@ -57,6 +57,7 @@ definePageMeta({
 const client = useSanctumClient()
 const { refreshIdentity } = useSanctumAuth()
 const { redirectToItineraryIfLoggedIn } = useAuthRedirect()
+const route = useRoute()
 
 const loading = ref(false)
 const error = ref('')
@@ -67,6 +68,15 @@ const form = reactive({
   password: '',
   password_confirmation: '',
 })
+
+const redirectAfterRegister = async () => {
+  const redirect = route.query.redirect
+  if (typeof redirect === 'string' && redirect.startsWith('/')) {
+    await navigateTo(redirect)
+    return
+  }
+  await navigateTo('/itineraries')
+}
 
 onMounted(async () => {
   await redirectToItineraryIfLoggedIn()
@@ -89,7 +99,7 @@ const register = async () => {
     })
 
     await refreshIdentity()
-    await navigateTo('/itineraries')
+    await redirectAfterRegister()
   } catch (err) {
     error.value = err?.data?.message ?? 'Registration failed.'
   } finally {

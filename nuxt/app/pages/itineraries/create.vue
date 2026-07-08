@@ -4,7 +4,11 @@
     <p class="text-gray-500 mb-6">Tell us your preferences and AI will build a Malaysia itinerary for you.</p>
 
     <a-card>
-      <TripParamsForm :loading="generating" @submit="handleGenerate" />
+      <TripParamsForm
+        :loading="generating"
+        :initial-location="initialLocation"
+        @submit="handleGenerate"
+      />
     </a-card>
 
     <a-alert
@@ -25,9 +29,14 @@ definePageMeta({
 })
 
 const { generateOutline } = useItinerary()
+const route = useRoute()
 
 const generating = ref(false)
 const error = ref('')
+const initialLocation = computed(() => {
+  const location = route.query.location
+  return typeof location === 'string' ? location : ''
+})
 
 const handleGenerate = async (params) => {
   generating.value = true
