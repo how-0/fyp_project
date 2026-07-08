@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Middleware\CheckIfAdmin;
+use Backpack\CRUD\app\Http\Middleware\AuthenticateSession;
+use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
+
 return [
 
     /*
@@ -46,7 +50,7 @@ return [
 
     // Set this to false if you would like to skip adding the dashboard routes
     // (you then need to overwrite the login route on your AuthController)
-    'setup_dashboard_routes' => true,
+    'setup_dashboard_routes' => false,
 
     // Set this to false if you would like to skip adding "my account" routes
     // (you then need to manually define the routes in your web.php)
@@ -110,9 +114,9 @@ return [
     // The classes for the middleware to check if the visitor is an admin
     // Can be a single class or an array of classes
     'middleware_class' => [
-        App\Http\Middleware\CheckIfAdmin::class,
-        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \Backpack\CRUD\app\Http\Middleware\AuthenticateSession::class,
+        CheckIfAdmin::class,
+        ConvertEmptyStringsToNull::class,
+        AuthenticateSession::class,
         // \Backpack\CRUD\app\Http\Middleware\UseBackpackAuthGuardInsteadOfDefaultAuthGuard::class,
     ],
 

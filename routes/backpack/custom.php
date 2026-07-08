@@ -16,6 +16,8 @@ Route::group([
     ),
     'namespace' => 'App\Http\Controllers\Admin',
 ], function () {
+    Route::redirect('/', '/admin/destination', 302)->name('backpack');
+
     Route::crud('destination', 'DestinationCrudController');
     Route::crud('itinerary', 'ItineraryCrudController');
 });
