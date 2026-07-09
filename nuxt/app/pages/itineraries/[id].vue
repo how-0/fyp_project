@@ -53,8 +53,8 @@
       v-if="generationError"
       type="warning"
       class="mb-6"
-      :content="generationError"
     >
+      {{ generationError }}
       <template #action>
         <a-button size="small" type="primary" @click="resumeGeneration">Retry</a-button>
       </template>
@@ -216,9 +216,10 @@ const fillPendingDays = async () => {
       itinerary.value = await generateDay(route.params.id, nextDay.day_number)
     }
   } catch (err) {
-    generationError.value =
-      err?.data?.message ||
-      `Day ${currentGeneratingDay.value} could not be generated. Click Retry to continue.`
+    generationError.value = getApiErrorMessage(
+      err,
+      `Day ${currentGeneratingDay.value} could not be generated. Click Retry to continue.`,
+    )
   } finally {
     progressiveGenerating.value = false
     currentGeneratingDay.value = 0

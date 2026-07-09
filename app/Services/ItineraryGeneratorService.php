@@ -95,7 +95,7 @@ class ItineraryGeneratorService
     {
         set_time_limit((int) config('itinerary.generation_time_limit', 120));
 
-        $aiData = $this->generateJson($this->buildOutlinePrompt($params), 2048);
+        $aiData = $this->generateJson($this->buildOutlinePrompt($params), 4096);
 
         return DB::transaction(function () use ($user, $params, $aiData) {
             $itinerary = Itinerary::create([
@@ -281,6 +281,11 @@ class ItineraryGeneratorService
             ->generateContent($prompt);
 
         $text = $result->text();
+
+        \Log::info('Gemini Response:', [
+            'response' => $text,
+        ]);
+        
         $data = json_decode($text, true);
 
         if (! is_array($data)) {

@@ -14,11 +14,12 @@
     <a-alert
       v-if="error"
       type="error"
-      :content="error"
       class="mt-4"
       closable
       @close="error = ''"
-    />
+    >
+      {{ error }}
+    </a-alert>
   </div>
 </template>
 
@@ -48,7 +49,7 @@ const handleGenerate = async (params) => {
     const itinerary = await generateOutline(params)
     await navigateTo(`/itineraries/${itinerary.id}`)
   } catch (err) {
-    error.value = err?.data?.message || 'Failed to generate itinerary. Check your Gemini API key.'
+    error.value = getApiErrorMessage(err, 'Failed to generate itinerary. Check your Gemini API key.')
   } finally {
     generating.value = false
   }

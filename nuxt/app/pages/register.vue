@@ -25,9 +25,10 @@
       <a-alert
         v-if="error"
         type="error"
-        :content="error"
         class="mb-4"
-      />
+      >
+        {{ error }}
+      </a-alert>
 
       <a-button
         html-type="submit"
@@ -101,7 +102,7 @@ const register = async () => {
     await refreshIdentity()
     await redirectAfterRegister()
   } catch (err) {
-    error.value = err?.data?.message ?? 'Registration failed.'
+    error.value = getApiErrorMessage(err, 'Registration failed.')
   } finally {
     loading.value = false
   }

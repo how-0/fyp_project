@@ -29,9 +29,10 @@
       <a-alert
         v-if="error"
         type="error"
-        :content="error"
         class="mb-4"
-      />
+      >
+        {{ error }}
+      </a-alert>
 
       <a-button
         html-type="submit"
@@ -96,9 +97,7 @@ const handleLogin = async () => {
     await login(form)
     await redirectAfterLogin()
   } catch (err) {
-    error.value =
-      err?.response?.data?.message ||
-      'Invalid email or password'
+    error.value = getApiErrorMessage(err, 'Invalid email or password')
   } finally {
     loading.value = false
   }
