@@ -46,5 +46,8 @@ return [
 
     'generation_time_limit' => env('ITINERARY_GENERATION_TIME_LIMIT', 120),
 
+    // Progressive generation: how many days to fill per Gemini request.
+    'generation_batch_size' => (int) env('ITINERARY_GENERATION_BATCH_SIZE', 2),
+
     'gemini_model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
 ];

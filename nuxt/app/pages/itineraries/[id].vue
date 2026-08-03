@@ -36,7 +36,7 @@
       <div class="flex items-center gap-3 mb-2">
         <a-spin :size="18" />
         <span class="font-medium text-blue-800">
-          Building your itinerary... Day {{ currentGeneratingDay }} of {{ itinerary.duration_days }}
+          Building your itinerary... {{ generationStatusLabel }}
         </span>
       </div>
       <a-progress
@@ -45,7 +45,7 @@
         status="normal"
       />
       <p class="text-sm text-blue-700 mt-2">
-        Each day appears below as soon as it's ready — feel free to start reading.
+        Days appear below in batches of 2 — feel free to start reading as they arrive.
       </p>
     </div>
 
@@ -66,7 +66,7 @@
           :days="itinerary.days"
           :regenerating="regenerating"
           :pending-days="pendingDayNumbers"
-          :generating-day="currentGeneratingDay"
+          :generating-days="currentGeneratingDays"
           @reorder="handleReorder"
           @edit-activity="openEditModal"
           @suggest-activity="openSuggestDrawer"
@@ -88,6 +88,7 @@
           :budget-min="itinerary.budget_min"
           :budget-max="itinerary.budget_max"
           :breakdown="itinerary.budget_breakdown"
+          :days="itinerary.days"
           :budget-fit-percent="itinerary.budget_fit_percent"
         />
 
@@ -182,11 +183,25 @@ const statusOptions = [
   { label: 'Finalized', value: 'finalized' },
 ]
 
-// Progressive generation: fill empty days one by one so the user sees
-// results batch by batch instead of a single long loading state.
+// Progressive generation: backend fills up to 2 days per Gemini request.
+const GENERATION_BATCH_SIZE = 2
+
 const progressiveGenerating = ref(false)
-const currentGeneratingDay = ref(0)
+const currentGeneratingDays = ref([])
 const generationError = ref('')
+
+const generationStatusLabel = computed(() => {
+  if (!currentGeneratingDays.value.length) {
+    return `0 of ${itinerary.value?.duration_days || 0} days`
+  }
+
+  const days = currentGeneratingDays.value
+  const dayLabel = days.length === 1
+    ? `Day ${days[0]}`
+    : `Days ${days[0]}–${days[days.length - 1]}`
+
+  return `${dayLabel} of ${itinerary.value?.duration_days || 0}`
+})
 
 const pendingDayNumbers = computed(() => {
   if (!progressiveGenerating.value || !itinerary.value?.days) return []
@@ -209,20 +224,26 @@ const fillPendingDays = async () => {
 
   try {
     while (true) {
-      const nextDay = (itinerary.value?.days || []).find((day) => !day.activities?.length)
-      if (!nextDay) break
+      const pendingDays = (itinerary.value?.days || []).filter((day) => !day.activities?.length)
+      if (!pendingDays.length) break
 
-      currentGeneratingDay.value = nextDay.day_number
-      itinerary.value = await generateDay(route.params.id, nextDay.day_number)
+      const batch = pendingDays.slice(0, GENERATION_BATCH_SIZE)
+      currentGeneratingDays.value = batch.map((day) => day.day_number)
+      itinerary.value = await generateDay(route.params.id, batch[0].day_number)
     }
   } catch (err) {
+    const failedDays = currentGeneratingDays.value
+    const failedLabel = failedDays.length > 1
+      ? `Days ${failedDays[0]}–${failedDays[failedDays.length - 1]}`
+      : `Day ${failedDays[0] || '?'}`
+
     generationError.value = getApiErrorMessage(
       err,
-      `Day ${currentGeneratingDay.value} could not be generated. Click Retry to continue.`,
+      `${failedLabel} could not be generated. Click Retry to continue.`,
     )
   } finally {
     progressiveGenerating.value = false
-    currentGeneratingDay.value = 0
+    currentGeneratingDays.value = []
   }
 }
 

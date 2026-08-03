@@ -19,16 +19,26 @@ export default defineNuxtConfig({
     plugins: [
       tailwindcss(),
     ],
+    resolve: {
+      dedupe: ['vue', 'dayjs', '@arco-design/web-vue'],
+      alias: {
+        // Arco's date utils hard-import zh-cn; load English instead.
+        'dayjs/locale/zh-cn': 'dayjs/locale/en.js',
+        'dayjs/locale/zh-cn.js': 'dayjs/locale/en.js',
+      },
+    },
     optimizeDeps: {
       include: [
         'dayjs',
-        'dayjs/locale/zh-cn',
+        'dayjs/locale/en',
         'dayjs/plugin/advancedFormat',
         'dayjs/plugin/customParseFormat',
         'dayjs/plugin/isBetween',
         'dayjs/plugin/quarterOfYear',
         'dayjs/plugin/weekOfYear',
         'dayjs/plugin/weekYear',
+        '@arco-design/web-vue/es/locale',
+        '@arco-design/web-vue/es/locale/lang/en-us.js',
       ],
     },
     server: {

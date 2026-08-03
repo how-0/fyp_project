@@ -4,8 +4,7 @@
       <div class="flex-1">
         <div class="flex items-center gap-2 mb-1">
           <span class="text-xs text-gray-400 cursor-grab">⠿</span>
-          <a-tag v-if="activity.is_ai_suggested" color="arcoblue" size="small">AI</a-tag>
-          <a-tag :color="categoryColor" size="small">{{ activity.category }}</a-tag>
+          <a-tag :color="categoryColor" size="small">{{ categoryLabel }}</a-tag>
           <span v-if="activity.start_time" class="text-xs text-gray-500">
             {{ activity.start_time }}{{ activity.end_time ? ` - ${activity.end_time}` : '' }}
           </span>
@@ -51,6 +50,17 @@ const props = defineProps({
 })
 
 defineEmits(['edit', 'suggest'])
+
+const categoryLabel = computed(() => {
+  const labels = {
+    food: 'Food',
+    sightseeing: 'Sightseeing',
+    transport: 'Transport',
+    accommodation: 'Accommodation',
+    other: 'Other',
+  }
+  return labels[props.activity.category] || props.activity.category
+})
 
 const categoryColor = computed(() => {
   const colors = {

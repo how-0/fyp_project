@@ -2,8 +2,8 @@
   <div>
     <section class="mb-10">
       <h1 class="text-3xl font-bold mb-2">Plan your Malaysia trip</h1>
-      <p class="text-gray-500 text-lg mb-6">
-        Discover featured destinations or create a custom itinerary with AI.
+      <p class="text-gray-500 text-lg mb-6 max-w-2xl">
+        A travel planner that builds, verifies, and lets you continuously refine your itinerary.
       </p>
 
       <div v-if="isAuthenticated" class="flex gap-3">

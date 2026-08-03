@@ -10,7 +10,7 @@
           <h3 class="font-semibold">Day {{ day.day_number }}: {{ day.title }}</h3>
           <p v-if="day.notes" class="text-sm text-gray-500">{{ day.notes }}</p>
         </div>
-        <a-tag v-if="day.day_number === generatingDay" color="arcoblue">
+        <a-tag v-if="isGenerating(day)" color="arcoblue">
           <template #icon><icon-loading /></template>
           Generating...
         </a-tag>
@@ -77,10 +77,11 @@ const props = defineProps({
   editable: { type: Boolean, default: true },
   regenerating: { type: Boolean, default: false },
   pendingDays: { type: Array, default: () => [] },
-  generatingDay: { type: Number, default: 0 },
+  generatingDays: { type: Array, default: () => [] },
 })
 
 const isPending = (day) => props.pendingDays.includes(day.day_number)
+const isGenerating = (day) => props.generatingDays.includes(day.day_number)
 
 const emit = defineEmits(['reorder', 'edit-activity', 'suggest-activity', 'regenerate-day'])
 

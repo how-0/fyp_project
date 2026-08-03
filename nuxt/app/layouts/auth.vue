@@ -5,7 +5,9 @@
         <NuxtLink to="/" class="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors">
           MY Trip Planner
         </NuxtLink>
-        <p class="text-gray-500 mt-2 text-sm">Plan your perfect Malaysia trip with AI</p>
+        <p class="text-gray-500 mt-2 text-sm max-w-xs mx-auto">
+          A travel planner that builds, verifies, and lets you continuously refine your itinerary.
+        </p>
       </div>
       <slot />
     </div>
