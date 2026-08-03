@@ -15,6 +15,6 @@
 
 ## Development
 
-1. Open a terminal in the project folder and run `php artisan serve` (backend at http://localhost:8000)
+1. Open a terminal in the project folder and run `php artisan serve` (backend at http://127.0.0.1:8000/admin)
 2. Open another terminal, run `cd nuxt`
 3. Run `npm run dev` (frontend at http://localhost:3000)
